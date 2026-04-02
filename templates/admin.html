@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Admin — Smart Menu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📋 Add Menu</h1>
+    <p class="page-sub">Set dishes for each meal session</p>
+  </div>
+  <div class="header-date">
+    <span class="today-badge">Today: {{ today }}</span>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('admin') }}" class="admin-form" id="adminForm">
+
+  <!-- Date row -->
+  <div class="date-row">
+    <label class="date-label" for="menuDate">📅 Menu Date</label>
+    <div class="date-input-wrap">
+      <input type="date" id="menuDate" name="date" value="{{ today }}" required
+             onchange="loadExistingMenu(this.value)"/>
+    </div>
+    <span class="date-hint" id="dateHint"></span>
+  </div>
+
+  <!-- Session grid -->
+  <div class="session-grid" id="sessionGrid">
+
+    {% set colors = {
+        'breakfast': 'orange',
+        'lunch':     'yellow',
+        'snacks':    'green',
+        'dinner':    'purple'
+    } %}
+
+    {% for session in sessions %}
+    <div class="session-card color-{{ colors[session] }}" id="card-{{ session }}">
+
+      <div class="session-header">
+        <div class="session-icon-wrap">
+          <span class="session-icon">{{ icons[session] }}</span>
+        </div>
+        <h3 class="session-title">{{ session|capitalize }}</h3>
+        <span class="dish-count" id="count-{{ session }}">0 dishes</span>
+      </div>
+
+      <div class="dish-list" id="{{ session }}-box"></div>
+
+      <button type="button"
+              class="add-dish-btn"
+              onclick="addDish('{{ session }}-box','{{ session }}[]','{{ session }}')">
+        + Add Dish
+      </button>
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn-ghost" onclick="clearAllDishes()">🗑 Clear All</button>
+    <button type="submit" class="btn-save">✅ Save Menu</button>
+  </div>
+
+</form>
+
+<!-- Recent dates sidebar panel -->
+{% if recent %}
+<div class="recent-panel">
+  <h4 class="recent-title">📆 Recent Menus</h4>
+  <div class="recent-list">
+    {% for d in recent %}
+    <button class="recent-date-btn" onclick="document.getElementById('menuDate').value='{{ d }}'; loadExistingMenu('{{ d }}')">
+      {{ d }}
+    </button>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Dish management ──────────────────────────────────────────────────────────
+function addDish(boxId, inputName, session, value = "") {
+  const box = document.getElementById(boxId);
+  const row = document.createElement("div");
+  row.className = "dish-row";
+  row.innerHTML = `
+    <input class="dish-input" type="text" name="${inputName}"
+           placeholder="Enter dish name…" value="${value}" autocomplete="off"/>
+    <button type="button" class="remove-btn" onclick="removeDish(this, '${session}')"
+            title="Remove dish">✕</button>
+  `;
+  box.appendChild(row);
+  row.querySelector("input").focus();
+  updateCount(session);
+
+  // animate in
+  row.style.opacity = "0";
+  row.style.transform = "translateY(-8px)";
+  requestAnimationFrame(() => {
+    row.style.transition = "opacity .22s, transform .22s";
+    row.style.opacity    = "1";
+    row.style.transform  = "translateY(0)";
+  });
+}
+
+function removeDish(btn, session) {
+  const row = btn.closest(".dish-row");
+  row.style.transition = "opacity .18s, transform .18s";
+  row.style.opacity    = "0";
+  row.style.transform  = "translateX(10px)";
+  setTimeout(() => { row.remove(); updateCount(session); }, 180);
+}
+
+function updateCount(session) {
+  const box   = document.getElementById(session + "-box");
+  const n     = box ? box.querySelectorAll(".dish-row").length : 0;
+  const badge = document.getElementById("count-" + session);
+  if (badge) badge.textContent = n + (n === 1 ? " dish" : " dishes");
+}
+
+function clearAllDishes() {
+  if (!confirm("Clear all dishes?")) return;
+  ["breakfast","lunch","snacks","dinner"].forEach(s => {
+    const box = document.getElementById(s + "-box");
+    if (box) box.innerHTML = "";
+    updateCount(s);
+  });
+}
+
+// ── Load existing menu via AJAX ──────────────────────────────────────────────
+async function loadExistingMenu(dateVal) {
+  if (!dateVal) return;
+  const hint = document.getElementById("dateHint");
+  hint.textContent = "Loading…";
+  hint.className   = "date-hint loading";
+
+  try {
+    const res  = await fetch(`/admin/menu/${dateVal}`);
+    const data = await res.json();
+    const sessions = ["breakfast","lunch","snacks","dinner"];
+    let hasAny = false;
+
+    sessions.forEach(s => {
+      const box = document.getElementById(s + "-box");
+      box.innerHTML = "";
+      (data[s] || []).forEach(d => {
+        addDish(s + "-box", s + "[]", s, d.dish_name);
+        hasAny = true;
+      });
+      if (!box.querySelector(".dish-row")) {
+        addDish(s + "-box", s + "[]", s);
+      }
+      updateCount(s);
+    });
+
+    hint.textContent = hasAny ? "✏️ Editing existing menu" : "🆕 New menu for this date";
+    hint.className   = "date-hint " + (hasAny ? "exists" : "new");
+  } catch {
+    hint.textContent = "";
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  const dateInput = document.getElementById("menuDate");
+  loadExistingMenu(dateInput.value);
+});
+</script>
+{% endblock %}
