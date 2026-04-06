@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Login — Smart Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}"/>
+</head>
+<body class="auth-body">
+
+<div class="bg-gradient"></div>
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="auth-flash-wrap">
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">
+          <span>{{ msg }}</span>
+          <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="auth-page">
+
+  <!-- Left panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="logo-badge" style="width:48px;height:48px;font-size:24px;border-radius:14px;">🔥</div>
+      <div class="logo-wordmark" style="font-size:22px;">
+        <span class="logo-smart">Smart</span><span class="logo-menu">Menu</span>
+      </div>
+    </div>
+    <h2 class="auth-tagline">Eat smart.<br>Vote smarter.</h2>
+    <p class="auth-desc">Your daily meal companion. See today's menu, vote for your favourites, and never miss a great dish.</p>
+    <div class="auth-features">
+      <div class="auth-feat"><span>🍽️</span> Daily curated menus</div>
+      <div class="auth-feat"><span>❤️</span> Vote for your favourites</div>
+      <div class="auth-feat"><span>📊</span> See what's popular</div>
+    </div>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="auth-right">
+    <div class="auth-card">
+      <h3 class="auth-card-title">Welcome back 👋</h3>
+      <p class="auth-card-sub">Log in with your Roll No to continue</p>
+
+      <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+        <input type="hidden" name="next" value="{{ next }}"/>
+
+        <div class="form-field">
+          <label>Roll No</label>
+          <div class="input-wrap">
+            <span class="input-icon">🎓</span>
+            <input type="text" name="roll_no" placeholder="e.g. 21CS001"
+                   autocomplete="username" required/>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" name="password" id="pwdInput"
+                   placeholder="Your password" autocomplete="current-password" required/>
+            <button type="button" class="toggle-pwd" onclick="togglePwd()">👁</button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-submit-btn">Log In →</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <a href="{{ url_for('register') }}">Register here</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function togglePwd() {
+  const i = document.getElementById("pwdInput");
+  i.type = i.type === "password" ? "text" : "password";
+}
+</script>
+</body>
+</html>
