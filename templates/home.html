@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}Home — Smart Menu{% endblock %}
+
+{% block head %}
+<style>
+/* ── HERO ──────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 52px 48px 44px;
+  margin-bottom: 36px;
+  background: linear-gradient(135deg,
+    rgba(255,107,53,0.18) 0%,
+    rgba(167,139,250,0.12) 50%,
+    rgba(61,232,160,0.10) 100%);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(20px);
+}
+.hero-floats {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.hero-floats span {
+  position: absolute; font-size: 28px; opacity: 0.18;
+  animation: floatUp 8s ease-in-out infinite; user-select: none;
+}
+.hero-floats span:nth-child(1) { left:5%;  top:15%; animation-delay:0s;    font-size:32px; }
+.hero-floats span:nth-child(2) { left:15%; top:55%; animation-delay:-2.5s; font-size:22px; }
+.hero-floats span:nth-child(3) { left:80%; top:10%; animation-delay:-1s;   font-size:26px; }
+.hero-floats span:nth-child(4) { left:88%; top:60%; animation-delay:-4s;   font-size:20px; }
+.hero-floats span:nth-child(5) { left:50%; top:70%; animation-delay:-3s;   font-size:30px; }
+.hero-floats span:nth-child(6) { left:68%; top:30%; animation-delay:-6s;   font-size:18px; }
+.hero-floats span:nth-child(7) { left:35%; top:20%; animation-delay:-1.8s; font-size:24px; }
+@keyframes floatUp {
+  0%,100% { transform: translateY(0) rotate(0deg);    opacity:0.15; }
+  50%     { transform: translateY(-18px) rotate(8deg); opacity:0.28; }
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+}
+.hero-left { flex:1; min-width:240px; }
+.hero-greeting {
+  font-size:13px; font-weight:600; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--accent2);
+  display:flex; align-items:center; gap:7px; margin-bottom:10px;
+}
+.hero-greeting::before {
+  content:''; display:inline-block; width:24px; height:2px;
+  background:var(--accent2); border-radius:2px;
+}
+.hero-title {
+  font-family:'Rumbloon';
+  font-size: clamp(60px,4vw,60px);
+  font-weight:800; letter-spacing:-1.5px; line-height:1.08; margin-bottom:14px;
+  background: linear-gradient(135deg,var(--accent) 0%,#4874f7 60%,var(--c-green) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; background-size:200%;
+  animation: shimmer 5s ease infinite;
+}
+.hero-title .hl {
+  background: linear-gradient(135deg,var(--accent) 0%,#4261bd 60%,var(--c-green) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; background-size:200%;
+  animation: shimmer 5s ease infinite;
+}
+@keyframes shimmer {
+  0%  { background-position:0% }
+  50% { background-position:100% }
+  100%{ background-position:0% }
+}
+.hero-sub { font-size:14px; color:var(--muted); line-height:1.65; max-width:380px; }
+.hero-right { display:flex; flex-direction:column; align-items:flex-end; gap:14px; }
+.hero-date-card {
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px; padding:16px 22px; text-align:center;
+  backdrop-filter:blur(10px); min-width:140px;
+}
+.hero-date-day {
+  font-family:'Syne',sans-serif; font-size:38px; font-weight:800;
+  line-height:1; color:var(--accent);
+}
+.hero-date-label {
+  font-size:11px; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--muted); margin-top:4px;
+}
+.hero-date-full { font-size:12px; color:var(--text); margin-top:6px; font-weight:500; }
+.hero-vote-btn {
+  display:inline-flex; align-items:center; gap:9px;
+  padding:13px 26px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none; color:#fff;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.3px;
+  border-radius:12px; cursor:pointer; text-decoration:none;
+  box-shadow:0 4px 24px rgba(255,107,53,.4);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.hero-vote-btn:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(255,107,53,.55); }
+.hero-vote-btn .btn-arrow {
+  width:22px; height:22px; border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  display:flex; align-items:center; justify-content:center; font-size:12px;
+}
+.hero-stats { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+.stat-pill {
+  display:flex; align-items:center; gap:7px;
+  background:rgba(220, 201, 201, 0.06); border:1px solid rgba(255,255,255,0.10);
+  border-radius:20px; padding:6px 14px; font-size:12px; color:var(--muted);
+}
+.stat-pill strong { color:var(--text); font-weight:600; }
+.stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── SECTION HEADER ──────────────────────────────────── */
+.section-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px; flex-wrap:wrap; gap:10px;
+}
+.section-title {
+  font-family:'Syne',sans-serif; font-size:18px; font-weight:700;
+  display:flex; align-items:center; gap:9px;
+}
+.section-title::after {
+  content:''; display:block; height:2px; width:32px;
+  background:linear-gradient(90deg,var(--accent),transparent); border-radius:2px;
+}
+.section-badge {
+  font-size:12px; color:var(--muted);
+  background:rgba(255,255,255,0.05); border:1px solid var(--glass-bdr);
+  padding:4px 12px; border-radius:20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="hero-floats">
+    <span>🍛</span><span>🥗</span><span>🍳</span>
+    <span>🥞</span><span>☕</span><span>🍚</span><span>🥘</span>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-greeting"><h2>Good day, foodie</h2></div>
+      <h1 class="hero-title">
+        What's on the<br>
+        <span class="hl">plate today?</span>
+      </h1>
+      <p class="hero-sub">
+        Fresh meals, handpicked every day. Browse today's sessions,
+        vote for your favourite dishes, and let the kitchen know what you love.
+      </p>
+
+      {% set total_dishes = namespace(n=0) %}
+      {% set total_votes  = namespace(n=0) %}
+      {% for s in sessions %}
+        {% set total_dishes.n = total_dishes.n + menu[s]|length %}
+        {% for d in menu[s] %}{% set total_votes.n = total_votes.n + d.votes %}{% endfor %}
+      {% endfor %}
+
+      <div class="hero-stats">
+        <div class="stat-pill">
+          <span class="stat-dot" style="background:var(--c-orange)"></span>
+          <strong>{{ total_dishes.n }}</strong>&nbsp;dishes today
+        </div>
+        <div class="stat-pill">
+          <span class="stat-dot" style="background:var(--c-green)"></span>
+          <strong>4</strong>&nbsp;sessions
+        </div>
+        {% if total_votes.n %}
+        <div class="stat-pill">
+          <span class="stat-dot" style="background:var(--c-purple)"></span>
+          <strong>{{ total_votes.n }}</strong>&nbsp;votes cast
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-date-card">
+        <div class="hero-date-day" id="heroDay">--</div>
+        <div class="hero-date-label" id="heroMonth">Loading</div>
+        <div class="hero-date-full">{{ today }}</div>
+      </div>
+      <a href="{{ url_for('vote_page') }}" class="hero-vote-btn">
+        🗳️ Go Vote <span class="btn-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% if has_menu %}
+<div class="section-header">
+  <h2 class="section-title">🍽️ Today's Menu</h2>
+  <span class="section-badge">{{ today }}</span>
+</div>
+
+<div class="session-grid">
+  {% set colors = {'breakfast':'orange','lunch':'yellow','snacks':'green','dinner':'purple'} %}
+  {% for session in sessions %}
+  {% if menu[session] %}
+  <div class="session-card color-{{ colors[session] }}">
+    <div class="session-header">
+      <div class="session-icon-wrap"><span class="session-icon">{{ icons[session] }}</span></div>
+      <h3 class="session-title">{{ session|capitalize }}</h3>
+      <span class="dish-count">{{ menu[session]|length }} dishes</span>
+    </div>
+    <ul class="home-dish-list">
+      {% for dish in menu[session] %}
+      <li class="home-dish-item">
+        <span class="dish-dot"></span>
+        <span>{{ dish.dish_name }}</span>
+        {% if dish.votes %}<span class="vote-pill">❤️ {{ dish.votes }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🍳</div>
+  <h3>No menu set for today</h3>
+  <p>Check back later or add one in the admin panel.</p>
+  <a href="{{ url_for('admin') }}" class="btn-save">📋 Add Menu</a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const d = new Date();
+document.getElementById("heroDay").textContent   = d.getDate();
+document.getElementById("heroMonth").textContent = d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+</script>
+{% endblock %}
