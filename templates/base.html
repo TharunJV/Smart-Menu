@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{% block title %}Smart Menu{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}"/>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="bg-orbs">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge"><span class="logo-flame">🔥</span></div>
+    <div class="logo-wordmark">
+      <a href="{{ url_for('home') }}" style = "text-decoration: none;">
+        <span class="logo-smart">Smart</span><span class="logo-menu">Menu</span>
+      </a>
+      <span class="logo-pill">v2</span>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+
+  {% if session.user_id %}
+  <div class="sidebar-user-card">
+    <div class="user-avatar">{{ session.user_name[0]|upper }}</div>
+    <div class="user-info">
+      <div class="user-name">{{ session.user_name }}</div>
+      <div class="user-role role-{{ session.role }}">
+        {% if session.role == 'admin' %}⚙️ Admin{% else %}🎓 Student{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('home') }}"      class="nav-link {% if request.endpoint=='home'      %}active{% endif %}"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="{{ url_for('vote_page') }}" class="nav-link {% if request.endpoint=='vote_page' %}active{% endif %}"><span class="nav-icon">🗳️</span><span>Vote</span></a>
+    <a href="{{ url_for('profile') }}"   class="nav-link {% if request.endpoint=='profile'   %}active{% endif %}"><span class="nav-icon">👤</span><span>Profile</span></a>
+
+    {% if session.role == 'admin' %}
+    <div class="nav-section-label">Admin</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint=='admin_dashboard' %}active{% endif %}"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+    <a href="{{ url_for('admin') }}"           class="nav-link {% if request.endpoint=='admin'           %}active{% endif %}"><span class="nav-icon">📋</span><span>Add Menu</span></a>
+    <a href="{{ url_for('admin_students') }}"  class="nav-link {% if request.endpoint=='admin_students'  %}active{% endif %}"><span class="nav-icon">👥</span><span>Students</span></a>
+    <a href="{{ url_for('admin_admins') }}"    class="nav-link {% if request.endpoint=='admin_admins'    %}active{% endif %}"><span class="nav-icon">⚙️</span><span>Admins</span></a>
+    {% endif %}
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a href="{{ url_for('logout') }}" class="logout-btn"><span>🚪</span> Log Out</a>
+  </div>
+  {% else %}
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('login') }}"    class="nav-link {% if request.endpoint=='login'    %}active{% endif %}"><span class="nav-icon">🔑</span><span>Login</span></a>
+    <a href="{{ url_for('register') }}" class="nav-link {% if request.endpoint=='register' %}active{% endif %}"><span class="nav-icon">📝</span><span>Register</span></a>
+  </nav>
+  {% endif %}
+
+  <div class="sidebar-footer"><span>Smart Menu v2.0</span></div>
+</aside>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar">
+  <button class="hamburger" onclick="openSidebar()">☰</button>
+  <div class="mobile-logo">
+    <span>🔥</span>
+    <a href="{{ url_for('home') }}" style = "text-decoration: none;">
+      <span class="logo-smart">Smart</span><span class="logo-menu">Menu</span></a>
+  </div>
+  {% if session.user_id %}
+  <a href="{{ url_for('profile') }}" class="mobile-avatar">{{ session.user_name[0]|upper }}</a>
+  {% endif %}
+</div>
+
+<main class="main-content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">
+            <span>{{ msg }}</span>
+            <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+{% if session.user_id %}
+<!-- Mobile bottom nav -->
+<nav class="mobile-nav">
+  <a href="{{ url_for('home') }}"      class="mobile-nav-item {% if request.endpoint=='home'      %}active{% endif %}">
+    <span class="mnav-icon">🏠</span><span>Home</span>
+  </a>
+  <a href="{{ url_for('vote_page') }}" class="mobile-nav-item {% if request.endpoint=='vote_page' %}active{% endif %}">
+    <span class="mnav-icon">🗳️</span><span>Vote</span>
+  </a>
+  <a href="{{ url_for('profile') }}"   class="mobile-nav-item {% if request.endpoint=='profile'   %}active{% endif %}">
+    <span class="mnav-icon">👤</span><span>Profile</span>
+  </a>
+  {% if session.role == 'admin' %}
+  <a href="{{ url_for('admin_dashboard') }}" class="mobile-nav-item {% if request.endpoint in ['admin_dashboard','admin','admin_students','admin_admins'] %}active{% endif %}">
+    <span class="mnav-icon">⚙️</span><span>Admin</span>
+  </a>
+  {% endif %}
+  <a href="{{ url_for('logout') }}" class="mobile-nav-item">
+    <span class="mnav-icon">🚪</span><span>Logout</span>
+  </a>
+</nav>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

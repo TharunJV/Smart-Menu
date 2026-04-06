@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Admins — Smart Menu{% endblock %}
+
+{% block head %}
+<style>
+/* ── ADMINS PAGE ────────────────────────────── */
+.admins-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .admins-grid { grid-template-columns: 1fr; }
+}
+
+/* Admin list card */
+.admins-list-card {
+  background: var(--glass); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-bdr); border-radius: 18px;
+  overflow: hidden;
+}
+.admins-list-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--glass-bdr);
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.03);
+}
+.admins-list-header h3 {
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; flex: 1;
+}
+.admin-count-badge {
+  font-size: 12px; padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,107,53,.15); color: var(--accent);
+  font-weight: 600;
+}
+
+.admin-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background .15s;
+}
+.admin-row:last-child { border-bottom: none; }
+.admin-row:hover { background: rgba(255,255,255,.03); }
+
+.admin-avatar {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: #fff;
+  box-shadow: 0 4px 12px rgba(255,107,53,.3);
+}
+.admin-avatar.you {
+  background: linear-gradient(135deg, #a78bfa, #818cf8);
+  box-shadow: 0 4px 12px rgba(167,139,250,.3);
+}
+
+.admin-info { flex: 1; min-width: 0; }
+.admin-name {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.admin-meta {
+  display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap;
+}
+.admin-roll {
+  background: rgba(255,255,255,.08); padding: 2px 8px;
+  border-radius: 6px; font-size: 12px; font-family: monospace;
+  color: var(--c-green);
+}
+.admin-since { font-size: 11px; color: var(--muted); }
+.you-tag {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px;
+  background: rgba(167,139,250,.15); color: #a78bfa; font-weight: 600;
+}
+
+.admin-del-btn {
+  padding: 6px 14px; font-size: 12px; font-weight: 500;
+  background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.2);
+  color: #ff6060; border-radius: 8px; cursor: pointer; white-space: nowrap;
+  transition: background .18s; flex-shrink: 0;
+}
+.admin-del-btn:hover { background: rgba(255,80,80,.22); }
+.admin-del-btn:disabled {
+  opacity: .35; cursor: not-allowed;
+}
+
+/* Add admin form card */
+.add-admin-card {
+  background: var(--glass); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-bdr); border-radius: 18px;
+  overflow: hidden; position: sticky; top: 88px;
+}
+.add-admin-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--glass-bdr);
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.03);
+}
+.add-admin-header h3 {
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+}
+.add-admin-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.field-grp { display: flex; flex-direction: column; gap: 6px; }
+.field-grp label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--muted);
+}
+.field-grp input {
+  width: 100%; background: rgba(255,255,255,.06);
+  border: 1.5px solid var(--glass-bdr); border-radius: 10px;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; padding: 11px 14px; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  box-sizing: border-box;
+}
+.field-grp input:focus {
+  border-color: var(--accent); background: rgba(255,255,255,.09);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.pwd-strength-wrap {
+  height: 4px; background: rgba(255,255,255,.08);
+  border-radius: 4px; overflow: hidden; margin-top: -8px;
+}
+.pwd-strength-bar {
+  height: 100%; width: 0; border-radius: 4px;
+  transition: width .35s, background .35s;
+}
+
+.add-admin-hint {
+  padding: 11px 14px;
+  background: rgba(247,201,72,.07); border: 1px solid rgba(247,201,72,.18);
+  border-radius: 10px; font-size: 12px; color: var(--muted); line-height: 1.6;
+}
+.add-admin-hint strong { color: #f7c948; }
+
+.btn-create-admin {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; color: #fff;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  border-radius: 10px; cursor: pointer;
+  box-shadow: 0 4px 18px var(--glow);
+  transition: transform .2s, box-shadow .2s;
+}
+.btn-create-admin:hover {
+  transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,53,.45);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">⚙️ Admin Accounts</h1>
+    <p class="page-sub">Manage who has admin access</p>
+  </div>
+</div>
+
+<div class="admins-grid">
+
+  <!-- Left — admin list -->
+  <div class="admins-list-card">
+    <div class="admins-list-header">
+      <span>👑</span>
+      <h3>Current Admins</h3>
+      <span class="admin-count-badge">{{ admins|length }} admin{{ 's' if admins|length != 1 }}</span>
+    </div>
+
+    {% for a in admins %}
+    <div class="admin-row">
+      <div class="admin-avatar {% if a.id == session.user_id %}you{% endif %}">
+        {{ a.name[0]|upper }}
+      </div>
+      <div class="admin-info">
+        <div class="admin-name">{{ a.name }}</div>
+        <div class="admin-meta">
+          <span class="admin-roll">{{ a.roll_no }}</span>
+          <span class="admin-since">Since {{ a.created_at or 'N/A' }}</span>
+          {% if a.id == session.user_id %}
+          <span class="you-tag">You</span>
+          {% endif %}
+        </div>
+      </div>
+      <form method="POST"
+            action="{{ url_for('delete_admin', uid=a.id) }}"
+            onsubmit="return confirm('Remove admin {{ a.name }}? This cannot be undone.')">
+        <button type="submit" class="admin-del-btn"
+                {% if a.id == session.user_id or admins|length <= 1 %}disabled{% endif %}
+                title="{% if a.id == session.user_id %}Cannot delete yourself{% elif admins|length <= 1 %}Cannot delete last admin{% endif %}">
+          🗑 Remove
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div style="padding:30px;text-align:center;color:var(--muted);font-size:13px;">
+      No admins found.
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Right — add admin form -->
+  <div class="add-admin-card">
+    <div class="add-admin-header">
+      <span>➕</span>
+      <h3>Add New Admin</h3>
+    </div>
+    <form method="POST" action="{{ url_for('create_admin') }}" class="add-admin-body">
+
+      <div class="field-grp">
+        <label>Full Name</label>
+        <input type="text" name="name" placeholder="e.g. Priya Sharma" required/>
+      </div>
+
+      <div class="field-grp">
+        <label>Roll No / Username</label>
+        <input type="text" name="roll_no" placeholder="e.g. admin3" required/>
+      </div>
+
+      <div class="field-grp">
+        <label>Password</label>
+        <input type="password" name="password" id="newAdminPwd"
+               placeholder="Min 6 characters" required/>
+      </div>
+
+      <div class="pwd-strength-wrap">
+        <div class="pwd-strength-bar" id="adminStrengthBar"></div>
+      </div>
+
+      <div class="add-admin-hint">
+        <strong>Note:</strong> Admins can add menus, view the dashboard, manage students, and create other admins.
+        Each admin logs in with their own Roll No and password simultaneously.
+      </div>
+
+      <button type="submit" class="btn-create-admin">⚙️ Create Admin Account</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("newAdminPwd").addEventListener("input", function () {
+  const v = this.value;
+  let s = 0;
+  if (v.length >= 6)  s++;
+  if (v.length >= 10) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const colors = ["", "#ff6060", "#f7c948", "#ffb347", "#3de8a0", "#a78bfa"];
+  const bar = document.getElementById("adminStrengthBar");
+  bar.style.width = (s / 5 * 100) + "%";
+  bar.style.background = colors[s] || "transparent";
+});
+</script>
+{% endblock %}
