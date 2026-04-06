@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Students — Smart Menu{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">👥 Registered Students</h1>
+    <p class="page-sub">{{ students|length }} student{{ 's' if students|length != 1 }}</p>
+  </div>
+</div>
+
+{% if students %}
+<div class="students-table-wrap">
+  <table class="students-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Roll No</th>
+        <th>Joined</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td class="td-num">{{ loop.index }}</td>
+        <td>
+          <div class="student-row">
+            <div class="student-avatar">{{ s.name[0]|upper }}</div>
+            {{ s.name }}
+          </div>
+        </td>
+        <td><code class="roll-code">{{ s.roll_no }}</code></td>
+        <td class="td-muted">{{ s.created_at or '—' }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('delete_student', uid=s.id) }}"
+                onsubmit="return confirm('Remove {{ s.name }}?')">
+            <button type="submit" class="del-btn">🗑 Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👤</div>
+  <h3>No students registered yet</h3>
+  <p>Share the registration link with your students.</p>
+</div>
+{% endif %}
+{% endblock %}
